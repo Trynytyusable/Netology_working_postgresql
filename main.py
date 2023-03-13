@@ -49,12 +49,13 @@ def add_phone(cur, client_id, phone):
     conn.commit()
 
 # 4. Функция позволяющая изменить данные о клиенте
-def change_client(cur, client_id, name=None, surname=None, email=None, phones=None):
+# def change_client(cur, client_id, name=None, surname=None, email=None, phones=None):
+def change_client(cur, client_id, *args):
     cur.execute("""
             UPDATE clients
             SET name = %s, surname = %s, email = %s
             WHERE id = %s;
-            """, (name, surname, email, client_id))
+            """, (el for el in *args))
 
     cur.execute("""
             UPDATE clients_phone
@@ -81,18 +82,19 @@ def find_client(conn, name=None, surname=None, email=None, phone=None):
     cur.execute("""
                 SELECT clients.name, clients.surname, clients.email, clients_phone.phone FROM clients
                 LEFT JOIN clients_phone on clients.id=clients_phone.clients_id
-                where (name like %s) OR (surname like %s) OR (email like %s) OR (phone like %s)
+                where (name like %s) AND (surname like %s) AND (email like %s) AND (phone like %s)
                 """, (name, surname, email, phone))
     print(cur.fetchmany(3))
+    
+if __name__ == “__main__”:
+    conn = psycopg2.connect(database='sqlnettask4', user='postgres', password='123')
+    with psycopg2.connect(***) as cur:
 
-conn = psycopg2.connect(database='sqlnettask4', user='postgres', password='123')
-with conn.cursor() as cur:
-
-    delete_db(cur)
-    create_db(cur)
-    add_client(cur, 'Рифат', 'Бахтиев', 'rifat@gmail.com')
-    add_phone(cur, 1, '8926')
-    change_client(cur, 1, "Иван", "Иванов", "ivan@gmail.com", "8999")
-    delete_phone(cur, 1, "8999")
-    delete_client(cur, '1')
-    find_client(cur, "Иван", "")
+        delete_db(cur)
+        create_db(cur)
+        add_client(cur, 'Рифат', 'Бахтиев', 'rifat@gmail.com')
+        add_phone(cur, 1, '8926')
+        change_client(cur, 1, "Иван", "Иванов", "ivan@gmail.com", "8999")
+        delete_phone(cur, 1, "8999")
+        delete_client(cur, '1')
+        find_client(cur, "Иван", "")
